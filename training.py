@@ -6,8 +6,8 @@ from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, Ta
 
 
 dataset = load_dataset("jtatman/python-code-dataset-500k", split="train")
-train_dataset = dataset["train"].shuffle(seed=42).select(range(10000))
-eval_dataset = dataset["train"].shuffle(seed=42).select(range(1000))
+train_dataset = dataset.shuffle(seed=42).select(range(10000))
+eval_dataset = dataset.shuffle(seed=42).select(range(1000))
 
 model_name = "meta-llama/CodeLlama-7b-hf"
 tokenizer = AutoTokenizer.from_pretrained(model_name, token="")
