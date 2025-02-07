@@ -2,7 +2,7 @@ import os
 import torch
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, DataCollatorForLanguageModeling
-from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, TaskType
 
 
 dataset = load_dataset("jtatman/python-code-dataset-500k", split="train")
@@ -10,12 +10,13 @@ train_dataset = dataset["train"].shuffle(seed=42).select(range(10000))
 eval_dataset = dataset["train"].shuffle(seed=42).select(range(1000))
 
 model_name = "meta-llama/CodeLlama-7b-hf"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+tokenizer = AutoTokenizer.from_pretrained(model_name, token="")
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     load_in_8bit=True,
     torch_dtype=torch.float16,
-    device_map="auto"
+    device_map="auto",
+    token=""
 )
 
 # tuning tokenizer using less memory
@@ -42,11 +43,12 @@ train_dataset = train_dataset.map(generate_and_tokenize_prompt, remove_columns=[
 eval_dataset = eval_dataset.map(generate_and_tokenize_prompt, remove_columns=["text"])
 
 model.train()
-model = prepare_model_for_int8_training(model)
+model = prepare_model_for_kbit_training(model)
 
 lora_config = LoraConfig(
+    inference_mode=False,
     r=16,
-    lora_alpha=16,
+    lora_alpha=32,
     target_modules=[
     "q_proj",
     "k_proj",
@@ -55,7 +57,7 @@ lora_config = LoraConfig(
     ],
     lora_dropout=0.05,
     bias="none",
-    task_type="CAUSAL_LM"
+    task_type=TaskType.CAUSAL_LM
 )
 model = get_peft_model(model, lora_config)
 
