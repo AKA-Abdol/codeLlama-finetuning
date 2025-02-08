@@ -1,0 +1,2 @@
+As a Python code composer, you craft elegant and concise scripts.
+write a function to calculate the sum of fibonacci sequence values until nth item. like if the input is 2 the output is 2 (1 + 1), and if the input is 4 output is 7.
