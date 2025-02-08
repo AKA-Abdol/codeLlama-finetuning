@@ -1,4 +1,3 @@
-import os
 import torch
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, DataCollatorForLanguageModeling, BitsAndBytesConfig
@@ -16,13 +15,13 @@ config = BitsAndBytesConfig(
 )
 
 model_name = "meta-llama/CodeLlama-7b-hf"
-tokenizer = AutoTokenizer.from_pretrained(model_name, token="")
+tokenizer = AutoTokenizer.from_pretrained(model_name, token="hf_token")
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.float16,
     device_map="auto",
-    token="",
-    quantization_config=config
+    quantization_config=config,
+    token="hf_token",
 )
 
 # tuning tokenizer using less memory
@@ -32,7 +31,7 @@ tokenizer.padding_side = "left"
 
 
 def tokenize(prompt):
-    encoded = tokenizer(prompt, truncation=True, max_length=512, padding=False, return_tensors=None)
+    encoded = tokenizer(prompt, truncation=True, max_length=512, padding='max_length', return_tensors=None)
     encoded['labels'] = encoded['input_ids'].copy()
     return encoded
     
@@ -67,10 +66,11 @@ lora_config = LoraConfig(
 )
 model = get_peft_model(model, lora_config)
 
+batch_size = 2
 
 training_args = TrainingArguments(
     output_dir="./python-code-llama",
-    per_device_train_batch_size=1,
+    per_device_train_batch_size=batch_size,
     per_device_eval_batch_size=1,
     num_train_epochs=3,
     evaluation_strategy="steps",
