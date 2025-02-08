@@ -36,7 +36,7 @@ def generate(prompt):
 def generate_prompt(data):
     prompt = f"""{data['system'].strip()}
 ### Instruction:
-{data['instruciton'].strip()}
+{data['instruction'].strip()}
 ### Output:
 """
     return prompt

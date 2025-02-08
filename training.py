@@ -38,7 +38,7 @@ def tokenize(prompt):
 def generate_and_tokenize_prompt(data):
     prompt = f"""{data['system'].strip()}
 ### Instruction:
-{data['instruciton'].strip()}
+{data['instruction'].strip()}
 ### Output:
 {data['output'].strip()}
 """
