@@ -1,5 +1,6 @@
 import torch
 from transformers import AutoModelForCausalLM, BitsAndBytesConfig, AutoTokenizer
+from peft import PeftModel
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -16,7 +17,9 @@ model = AutoModelForCausalLM.from_pretrained(
     device_map="auto",
     token="",
     quantization_config=config
-).to(device)
+)
+
+model = PeftModel.from_pretrained(model, 'python-code-llama/best_model').to(device)
 
 # tuning tokenizer using less memory
 tokenizer.add_eos_token = True
